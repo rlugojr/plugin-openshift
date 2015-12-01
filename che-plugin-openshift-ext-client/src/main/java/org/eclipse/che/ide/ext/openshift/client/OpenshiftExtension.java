@@ -22,6 +22,7 @@ import org.eclipse.che.ide.ext.openshift.client.oauth.DisconnectAccountAction;
 import org.eclipse.che.ide.ext.openshift.client.importapp.ImportApplicationAction;
 import org.eclipse.che.ide.ext.openshift.client.project.CreateApplicationFromTemplateAction;
 import org.eclipse.che.ide.ext.openshift.client.project.UnlinkProjectAction;
+import org.eclipse.che.ide.ext.openshift.client.service.add.AddServiceAction;
 import org.eclipse.che.ide.ext.openshift.client.delete.DeleteProjectAction;
 
 import javax.inject.Inject;
@@ -49,6 +50,7 @@ public class OpenshiftExtension {
                               CreateApplicationFromTemplateAction createApplicationFromTemplateAction,
                               LinkProjectWithExistingApplicationAction deployToExistingApplicationAction,
                               NewApplicationAction newApplicationAction,
+                              AddServiceAction addServiceAction,
                               DeleteProjectAction deleteProjectAction,
                               ShowApplicationUrlAction showApplicationUrlAction,
                               ShowWebhooksAction showWebhooksAction,
@@ -83,6 +85,16 @@ public class OpenshiftExtension {
 
         actionManager.registerAction("unlinkOpenshiftProject", unlinkProjectAction);
         openshift.add(unlinkProjectAction);
+        
+        openshift.addSeparator();
+        DefaultActionGroup serviceGroup = new DefaultActionGroup("Service", true, actionManager);
+        serviceGroup.getTemplatePresentation().setDescription("Add service...");
+        serviceGroup.getTemplatePresentation().setSVGIcon(null);//TODO replace with icon in nearest future
+        
+        actionManager.registerAction("addService", addServiceAction);
+        serviceGroup.add(addServiceAction);
+        
+        openshift.add(serviceGroup);
 
         openshift.addSeparator();
         actionManager.registerAction("createOpenshiftApplicationFromTemplate", createApplicationFromTemplateAction);

@@ -29,6 +29,14 @@ public interface OpenshiftResources extends ClientBundle {
     /** The CssResource interface for the Machine extension. */
     interface Css extends CssResource, Styles {
 
+        String floatRight();
+
+        String floatLeft();
+
+        String marginV();
+
+        String marginH();
+
         String sectionTitle();
 
         String sectionSeparator();
