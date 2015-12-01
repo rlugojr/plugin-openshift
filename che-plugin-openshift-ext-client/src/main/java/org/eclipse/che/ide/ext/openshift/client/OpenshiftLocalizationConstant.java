@@ -250,6 +250,21 @@ public interface OpenshiftLocalizationConstant extends Messages {
     @Key("retrieving.projects.data")
     String retrievingProjectsData();
 
+    @Key("add.service.description")
+    String addServiceActionDescription();
+
+    @Key("add.service.action")
+    String addServiceAction();
+
+    @Key("configure.service")
+    String configureService();
+
+    @Key("configure.service.environment.variables.table.title")
+    String configureServiceEnvironmentVariablesTableTitle();
+
+    @Key("configure.service.environment.labels.table.title")
+    String configureServiceEnvironmentLabelsTableTitle();
+
     @Key("delete.project.action.description")
     String deleteProjectActionDescription();
 
@@ -279,4 +294,7 @@ public interface OpenshiftLocalizationConstant extends Messages {
 
     @Key("project.is.not.linked.to.openshift.error")
     String projectIsNotLinkedToOpenShiftError(String projectName);
+
+    @Key("get.list.templates.failed")
+    String getListTemplatesFailed(String projectName);//todo
 }

@@ -8,15 +8,21 @@
  * Contributors:
  *   Codenvy, S.A. - initial API and implementation
  *******************************************************************************/
-package org.eclipse.che.ide.ext.openshift.client.project.wizard;
+package org.eclipse.che.ide.ext.openshift.client;
 
 import org.eclipse.che.ide.ext.openshift.client.dto.NewApplicationRequest;
+import org.eclipse.che.ide.ext.openshift.client.dto.NewServiceRequest;
+import org.eclipse.che.ide.ext.openshift.client.project.wizard.CreateProjectWizard;
+import org.eclipse.che.ide.ext.openshift.client.service.add.wizard.CreateServiceWizard;
 
 /**
  * Wizard factory. Creates new wizard based on data object.
  *
  * @author Vlad Zhukovskiy
+ * @author Alexander Andrienko
  */
-public interface CreateProjectWizardFactory {
-    CreateProjectWizard newWizard(NewApplicationRequest newApplicationRequest);
+public interface WizardFactory {
+    CreateProjectWizard newProjectWizard(NewApplicationRequest newApplicationRequest);
+
+    CreateServiceWizard newServiceWizard(NewServiceRequest newServiceRequest);
 }
