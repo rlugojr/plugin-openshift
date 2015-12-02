@@ -30,6 +30,8 @@ public interface ConfigureServiceView extends View<ConfigureServiceView.ActionDe
 
     void setEnvironmentLabels(Map<String, String> labels);
 
+    Map<String, String> getEnvironmentLabels();
+
     interface ActionDelegate {
     }
 }

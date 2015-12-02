@@ -22,7 +22,7 @@
         <g:center>
             <g:DockLayoutPanel>
                 <g:north size="24">
-                    <g:FlowPanel width="100%">
+                    <g:FlowPanel>
                         <g:Label text="{locale.configureServiceEnvironmentVariablesTableTitle}" addStyleNames="{resources.css.floatLeft}"/>
                     </g:FlowPanel>
                 </g:north>
@@ -38,7 +38,7 @@
                 <g:north size="24">
                     <g:FlowPanel>
                         <g:Label text="{locale.configureServiceEnvironmentLabelsTableTitle}" addStyleNames="{resources.css.floatLeft}"/>
-                        <g:Button text="+" addStyleNames="{resources.css.smallButton} {resources.css.floatRight}"/>
+                            <g:Button ui:field="addLabelButton" text="+" addStyleNames="{resources.css.smallButton} {resources.css.floatRight}"/>
                     </g:FlowPanel>
                 </g:north>
                 <g:center>

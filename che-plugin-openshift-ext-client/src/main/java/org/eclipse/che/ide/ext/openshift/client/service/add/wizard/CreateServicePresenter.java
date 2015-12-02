@@ -107,34 +107,35 @@ public class CreateServicePresenter implements Wizard.UpdateDelegate, CreateServ
     @Override
     public void onCreateClicked() {
         //configProjectPage.setEnabled(false);//TODO
-        view.setPreviousButtonEnabled(false);
-        view.setNextButtonEnabled(false);
-        view.setCreateButtonEnabled(false);
-        view.animateCreateButton(true);
-        view.setBlocked(true);
+//        view.setPreviousButtonEnabled(false);
+//        view.setNextButtonEnabled(false);
+//        view.setCreateButtonEnabled(false);
+//        view.animateCreateButton(true);
+//        view.setBlocked(true);
+        configurePage.updateData();
 
-        wizard.complete(new Wizard.CompleteCallback() {
-            @Override
-            public void onCompleted() {
-                //configProjectPage.setEnabled(true);//TODO
-                updateControls();
-                view.animateCreateButton(false);
-                view.setBlocked(false);
-
-                notificationManager.showInfo(locale.createFromTemplateSuccess());
-                view.closeWizard();
-            }
-
-            @Override
-            public void onFailure(Throwable e) {
-                //configurePage.setEnabled(true);
-                updateControls();
-                view.animateCreateButton(false);
-                view.setBlocked(false);
-
-                String message = e.getMessage() != null ? e.getMessage() : locale.createFromTemplateFailed();
-                notificationManager.showError(message);
-            }
-        });
+//        wizard.complete(new Wizard.CompleteCallback() {
+//            @Override
+//            public void onCompleted() {
+//                //configProjectPage.setEnabled(true);//TODO
+//                updateControls();
+//                view.animateCreateButton(false);
+//                view.setBlocked(false);
+//
+//                notificationManager.showInfo(locale.createFromTemplateSuccess());
+//                view.closeWizard();
+//            }
+//
+//            @Override
+//            public void onFailure(Throwable e) {
+//                //configurePage.setEnabled(true);
+//                updateControls();
+//                view.animateCreateButton(false);
+//                view.setBlocked(false);
+//
+//                String message = e.getMessage() != null ? e.getMessage() : locale.createFromTemplateFailed();
+//                notificationManager.showError(message);
+//            }
+//        });
     }
 }
