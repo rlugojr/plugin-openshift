@@ -17,8 +17,11 @@ import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.cell.client.TextInputCell;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -29,6 +32,7 @@ import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
 import com.google.gwt.user.client.ui.FlowPanel;
+import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.inject.Singleton;
@@ -37,8 +41,10 @@ import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftResources;
 import org.eclipse.che.ide.ext.openshift.client.deploy._new.KeyValue;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Parameter;
+import org.eclipse.che.ide.ext.openshift.shared.dto.Template;
 import org.eclipse.che.ide.ui.cellview.CellTableResources;
 import org.eclipse.che.ide.ui.window.Window;
+import org.eclipse.che.ide.util.loging.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -95,7 +101,7 @@ public class ConfigureServiceViewImpl extends Window implements ConfigureService
         labelsPanel.add(labelsTable);
     }
 
-    private CellTable<Parameter> createVariablesCellTable(CellTableResources tableResources) {
+    private CellTable<Parameter> createVariablesCellTable(final CellTableResources tableResources) {
         envVariablesTable = new CellTable<>(50, tableResources);
         envVariablesTable.setTableLayoutFixed(true);
         envVariablesTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
@@ -108,19 +114,11 @@ public class ConfigureServiceViewImpl extends Window implements ConfigureService
             }
         };
 
-        Column<Parameter, String> valueColumn = new Column<Parameter, String>(new TextInputCell()) {
+        Column<Parameter, String> valueColumn = new Column<Parameter, String>(new TextInputCellWithPlaceHolder("(generated if empty)")) {
             @Override
             public String getValue(Parameter parameter) {
                 return parameter.getValue();
             }
-
-//            @Override
-//            public void render(Cell.Context context, Parameter parameter, SafeHtmlBuilder sb) {
-//                if (parameter.getName().isEmpty()) {
-//                    Log.info(getClass(), "***" + sb.toString());
-//                }
-//                super.render(context, parameter, sb);
-//            }
         };
         valueColumn.setFieldUpdater(new FieldUpdater<Parameter, String>() {
             @Override
@@ -138,13 +136,32 @@ public class ConfigureServiceViewImpl extends Window implements ConfigureService
         return envVariablesTable;
     }
 
+//    interface Template extends SafeHtmlTemplates {
+//        @Template("<input type=\"text\" value=\"{0}\" placeholder=\"{1}\" tabindex=\"-1\" ></input>")
+//        SafeHtml input(final String value, final String placeHolder);
+//    }
+//
+//    private static class TextInputCellWithPlaceHolder extends TextInputCell {
+//
+//        private static Template template = GWT.create(Template.class);
+//
+//        @Override
+//        public void render(Context context, String value, SafeHtmlBuilder sb) {
+//            if (value == null) {
+//                sb.append(template.input("", "(generated if empty)"));
+//            } else {
+//                sb.append(template.input(value, "(generated if empty)"));
+//            }
+//        }
+//    }
+
     private CellTable<KeyValue> createLabelsTable(CellTableResources tableResources) {
         labelsTable = new CellTable<>(50, tableResources);
         labelsTable.setTableLayoutFixed(true);
         labelsTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
         labelsProvider.addDataDisplay(labelsTable);
 
-        final Column<KeyValue, String> keyColumn = new Column<KeyValue, String>(new TextInputCell()) {
+        final Column<KeyValue, String> keyColumn = new Column<KeyValue, String>(new TextInputCellWithPlaceHolder("Name")) {
             @Override
             public String getValue(KeyValue keyValue) {
                 return keyValue.getKey();
@@ -163,6 +180,15 @@ public class ConfigureServiceViewImpl extends Window implements ConfigureService
             @Override
             public String getValue(KeyValue keyValue) {
                 return keyValue.getValue();
+            }
+
+            @Override
+            public void render(Cell.Context context, KeyValue keyValue, SafeHtmlBuilder sb) {
+                if (keyValue.getValue().isEmpty()) {
+                    sb.appendHtmlConstant("<input type=\"text\" placeholder=\"Value\" tabindex=\"-1\">");
+                } else {
+                    super.render(context, keyValue, sb);
+                }
             }
         };
         valueColumn.setFieldUpdater(new FieldUpdater<KeyValue, String>() {
