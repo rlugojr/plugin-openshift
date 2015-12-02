@@ -29,6 +29,7 @@ import org.eclipse.che.ide.ext.openshift.client.OpenshiftServiceClient;
 import org.eclipse.che.ide.ext.openshift.client.dto.NewServiceRequest;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Template;
 import org.eclipse.che.api.project.shared.dto.ProjectDescriptor;
+import org.eclipse.che.ide.util.loging.Log;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
@@ -138,6 +139,11 @@ public class SelectServicePresenter extends AbstractWizardPage<NewServiceRequest
         this.template = template;
         dataObject.setTemplate(template);
         updateDelegate.updateControls();
+    }
+
+    @Override
+    public boolean canSkip() {//todo
+        return false;
     }
 
     @Override

@@ -13,9 +13,10 @@ package org.eclipse.che.ide.ext.openshift.client.service.add.wizard.page.configu
 import com.google.inject.ImplementedBy;
 
 import org.eclipse.che.ide.api.mvp.View;
-import org.eclipse.che.ide.ext.openshift.client.deploy._new.KeyValue;
+import org.eclipse.che.ide.ext.openshift.shared.dto.Parameter;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * //
@@ -25,9 +26,9 @@ import java.util.List;
 @ImplementedBy(ConfigureServiceViewImpl.class)
 public interface ConfigureServiceView extends View<ConfigureServiceView.ActionDelegate> {
 
-    void setEnvironmentVariables(List<KeyValue> keyValueList);
+    void setEnvironmentVariables(List<Parameter> parameters);
 
-    void setEnvironmentLabels(List<KeyValue> keyValueList);
+    void setEnvironmentLabels(Map<String, String> labels);
 
     interface ActionDelegate {
     }

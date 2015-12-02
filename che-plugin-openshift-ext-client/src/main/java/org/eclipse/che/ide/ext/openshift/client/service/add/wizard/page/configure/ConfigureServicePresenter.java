@@ -11,12 +11,20 @@
 package org.eclipse.che.ide.ext.openshift.client.service.add.wizard.page.configure;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
+import org.eclipse.che.ide.api.wizard.Wizard;
 import org.eclipse.che.ide.ext.openshift.client.dto.NewServiceRequest;
+import org.eclipse.che.ide.ext.openshift.shared.dto.Parameter;
+import org.eclipse.che.ide.ext.openshift.shared.dto.Template;
+import org.eclipse.che.ide.util.loging.Log;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Singleton;
+
+import java.util.List;
+import java.util.Map;
 
 @Singleton
 public class ConfigureServicePresenter extends AbstractWizardPage<NewServiceRequest> implements ConfigureServiceView.ActionDelegate {
@@ -31,11 +39,37 @@ public class ConfigureServicePresenter extends AbstractWizardPage<NewServiceRequ
     }
 
     @Override
-    public void go(AcceptsOneWidget container) {
-        container.setWidget(view);
+    public boolean isCompleted() {
+        Log.info(getClass(), "isCompleted");
+        return super.isCompleted();//todo
     }
 
-    //        Service service = dataObject.getService();
+    @Override
+    public void setUpdateDelegate(@NotNull Wizard.UpdateDelegate delegate) {
+        Log.info(getClass(), "update delegate");
+//
+        super.setUpdateDelegate(delegate);
+    }
+
+    @Override
+    public void init(NewServiceRequest dataObject) {
+        super.init(dataObject);
+//
+        Log.info(getClass(), "init");
+    }
+
+    @Override
+    public void go(AcceptsOneWidget container) {
+        container.setWidget(view);
+
+        Template template = dataObject.getTemplate();
+        List<Parameter> parameterList = template.getParameters();
+        Map<String, String> labels = template.getLabels();
+        view.setEnvironmentVariables(parameterList);
+        view.setEnvironmentLabels(labels);
+    }
+
+    //    Service service = dataObject.getService();
 //        service.setApiVersion(template.getApiVersion());
 //        service.setKind("Service");
 

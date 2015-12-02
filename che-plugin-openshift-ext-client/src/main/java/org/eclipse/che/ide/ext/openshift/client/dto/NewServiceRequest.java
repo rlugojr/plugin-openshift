@@ -22,7 +22,7 @@ public interface NewServiceRequest {
 
     NewServiceRequest withService(Service service);
 
-    void setTemplate(Template service);
+    void setTemplate(Template template);
 
     Template getTemplate();
 

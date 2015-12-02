@@ -11,8 +11,7 @@
 
 -->
 <ui:UiBinder xmlns:ui='urn:ui:com.google.gwt.uibinder'
-             xmlns:g='urn:import:com.google.gwt.user.client.ui'
-             xmlns:c='urn:import:com.google.gwt.user.cellview.client'>
+             xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <ui:with field="resources" type="org.eclipse.che.ide.ext.openshift.client.OpenshiftResources"/>
     <ui:with field='locale' type='org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant'/>
 
@@ -25,12 +24,11 @@
                 <g:north size="24">
                     <g:FlowPanel width="100%">
                         <g:Label text="{locale.configureServiceEnvironmentVariablesTableTitle}" addStyleNames="{resources.css.floatLeft}"/>
-                        <g:Button text="+" addStyleNames="{resources.css.smallButton} {resources.css.floatRight}"/>
                     </g:FlowPanel>
                 </g:north>
                 <g:center>
                     <g:ScrollPanel>
-                        <c:CellTable pageSize="7" ui:field="environmentVariables" width="100%"/>
+                        <g:FlowPanel ui:field="envVariablesPanel"/>
                     </g:ScrollPanel>
                 </g:center>
             </g:DockLayoutPanel>
@@ -45,7 +43,7 @@
                 </g:north>
                 <g:center>
                     <g:ScrollPanel>
-                        <c:CellTable pageSize="7" ui:field="environmentLabels" width="100%"/>
+                        <g:FlowPanel ui:field="labelsPanel"/>
                     </g:ScrollPanel>
                 </g:center>
             </g:DockLayoutPanel>
