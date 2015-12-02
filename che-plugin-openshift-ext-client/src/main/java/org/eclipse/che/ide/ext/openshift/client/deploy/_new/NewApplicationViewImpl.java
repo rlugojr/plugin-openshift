@@ -208,7 +208,7 @@ public class NewApplicationViewImpl extends Window implements NewApplicationView
     }
 
     private CellTable createCellTable(CellTableResources cellTableResources, final ListDataProvider<KeyValue> dataProvider) {
-        CellTable<KeyValue> table = new CellTable<KeyValue>(50, cellTableResources);
+        CellTable<KeyValue> table = new CellTable<>(50, cellTableResources);
         table.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
         dataProvider.addDataDisplay(table);
 
