@@ -11,10 +11,8 @@
 package org.eclipse.che.ide.ext.openshift.client.service.add.wizard.page.configure;
 
 import javax.inject.Inject;
-import javax.validation.constraints.NotNull;
 
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
-import org.eclipse.che.ide.api.wizard.Wizard;
 import org.eclipse.che.ide.ext.openshift.client.dto.NewServiceRequest;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Parameter;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Template;
@@ -39,26 +37,6 @@ public class ConfigureServicePresenter extends AbstractWizardPage<NewServiceRequ
     }
 
     @Override
-    public boolean isCompleted() {
-        Log.info(getClass(), "isCompleted");
-        return super.isCompleted();//todo
-    }
-
-    @Override
-    public void setUpdateDelegate(@NotNull Wizard.UpdateDelegate delegate) {
-        Log.info(getClass(), "update delegate");
-//
-        super.setUpdateDelegate(delegate);
-    }
-
-    @Override
-    public void init(NewServiceRequest dataObject) {
-        super.init(dataObject);
-//
-        Log.info(getClass(), "init");
-    }
-
-    @Override
     public void go(AcceptsOneWidget container) {
         container.setWidget(view);
 
@@ -69,24 +47,16 @@ public class ConfigureServicePresenter extends AbstractWizardPage<NewServiceRequ
         view.setEnvironmentLabels(labels);
     }
 
-    //    Service service = dataObject.getService();
-//        service.setApiVersion(template.getApiVersion());
-//        service.setKind("Service");
+    public void updateData() {
+        Template template = dataObject.getTemplate();
+        template.setLabels(view.getEnvironmentLabels());
 
-    //String name = template.getMetadata().getName();
-    //dataObject.getMetadata().setName(name);
+        for (Parameter parameter: template.getParameters()) {
+            Log.info(getClass(), "****" + parameter.getName() + " " + parameter.getValue());
+        }
 
-//        Map<String, String> annotation = template.getMetadata().getAnnotations();
-//        dataObject.getMetadata().setAnnotations(annotation);
-
-//        for (Object object: template.getObjects()) {
-//            JSONObject obj = (JSONObject)object;
-//            ServiceSpec spec = dtoFactory.createDtoFromJson(obj.get("spec").toString(), ServiceSpec.class);
-//            if (spec != null) {
-//                Log.info(getClass(), "spac found " + spec.toString());
-//                service.setSpec(spec);
-//            }
-//        }
-// dataObject  template.getParameters() ?
-
+        for (Map.Entry<String, String> map: template.getLabels().entrySet()) {
+            Log.info(getClass(), "####" + map.getKey() + " " + map.getValue());
+        }
+    }
 }
