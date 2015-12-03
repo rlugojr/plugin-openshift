@@ -114,28 +114,28 @@ public class CreateServicePresenter implements Wizard.UpdateDelegate, CreateServ
 //        view.setBlocked(true);
         configurePage.updateData();
 
-//        wizard.complete(new Wizard.CompleteCallback() {
-//            @Override
-//            public void onCompleted() {
-//                //configProjectPage.setEnabled(true);//TODO
-//                updateControls();
+        wizard.complete(new Wizard.CompleteCallback() {
+            @Override
+            public void onCompleted() {
+                //configProjectPage.setEnabled(true);//TODO
+                updateControls();
 //                view.animateCreateButton(false);
 //                view.setBlocked(false);
-//
-//                notificationManager.showInfo(locale.createFromTemplateSuccess());
-//                view.closeWizard();
-//            }
-//
-//            @Override
-//            public void onFailure(Throwable e) {
-//                //configurePage.setEnabled(true);
-//                updateControls();
+
+                notificationManager.showInfo(locale.createFromTemplateSuccess());
+                view.closeWizard();
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
+                //configurePage.setEnabled(true);
+                updateControls();
 //                view.animateCreateButton(false);
 //                view.setBlocked(false);
-//
-//                String message = e.getMessage() != null ? e.getMessage() : locale.createFromTemplateFailed();
-//                notificationManager.showError(message);
-//            }
-//        });
+
+                String message = e.getMessage() != null ? e.getMessage() : locale.createFromTemplateFailed();
+                notificationManager.showError(message);
+            }
+        });
     }
 }

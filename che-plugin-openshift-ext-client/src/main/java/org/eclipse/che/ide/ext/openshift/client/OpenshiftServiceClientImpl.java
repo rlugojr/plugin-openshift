@@ -35,6 +35,7 @@ import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+
 import java.util.List;
 
 import static com.google.gwt.http.client.RequestBuilder.PUT;
@@ -250,11 +251,16 @@ public class OpenshiftServiceClientImpl implements OpenshiftServiceClient {
 
     @Override
     public Promise<DeploymentConfig> createDeploymentConfig(final DeploymentConfig config) {
+        return createDeploymentConfig(config.getMetadata().getNamespace(), config);
+    }
+
+    @Override
+    public Promise<DeploymentConfig> createDeploymentConfig(final String namespace, final DeploymentConfig config) {
         return newPromise(new AsyncPromiseHelper.RequestCall<DeploymentConfig>() {
             @Override
             public void makeCall(AsyncCallback<DeploymentConfig> callback) {
                 asyncRequestFactory
-                        .createPostRequest(openshiftPath + "/namespace/" + config.getMetadata().getNamespace() + "/deploymentconfig",
+                        .createPostRequest(openshiftPath + "/namespace/" + namespace + "/deploymentconfig",
                                            config)
                         .header(CONTENT_TYPE, MimeType.APPLICATION_JSON)
                         .header(ACCEPT, MimeType.APPLICATION_JSON)
@@ -278,11 +284,16 @@ public class OpenshiftServiceClientImpl implements OpenshiftServiceClient {
 
     @Override
     public Promise<Service> createService(final Service service) {
+        return createService(service.getMetadata().getNamespace(), service);
+    }
+
+    @Override
+    public Promise<Service> createService(final String namespace, final Service service) {
         return newPromise(new AsyncPromiseHelper.RequestCall<Service>() {
             @Override
             public void makeCall(AsyncCallback<Service> callback) {
                 asyncRequestFactory
-                        .createPostRequest(openshiftPath + "/namespace/" + service.getMetadata().getNamespace() + "/service", service)
+                        .createPostRequest(openshiftPath + "/namespace/" + namespace + "/service", service)
                         .header(CONTENT_TYPE, MimeType.APPLICATION_JSON)
                         .header(ACCEPT, MimeType.APPLICATION_JSON)
                         .send(newCallback(callback, dtoUnmarshaller.newUnmarshaller(Service.class)));

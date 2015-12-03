@@ -16,11 +16,13 @@ import java.util.List;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 
+import org.eclipse.che.api.core.model.workspace.ProjectConfig;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
@@ -28,11 +30,10 @@ import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftServiceClient;
 import org.eclipse.che.ide.ext.openshift.client.dto.NewServiceRequest;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Template;
-import org.eclipse.che.api.project.shared.dto.ProjectDescriptor;
-import org.eclipse.che.ide.util.loging.Log;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
+
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
 
 @Singleton
@@ -68,8 +69,8 @@ public class SelectServicePresenter extends AbstractWizardPage<NewServiceRequest
     public void init(NewServiceRequest dataObject) {
         super.init(dataObject);
         
-        ProjectDescriptor projectDescriptor = appContext.getCurrentProject().getRootProject();
-        final String nameSpace = getAttributeValue(projectDescriptor, OPENSHIFT_NAMESPACE_VARIABLE_NAME);
+        ProjectConfigDto projectConfig = appContext.getCurrentProject().getRootProject();
+        final String nameSpace = getAttributeValue(projectConfig, OPENSHIFT_NAMESPACE_VARIABLE_NAME);
 
         view.showLoadingTemplates();
 
@@ -121,12 +122,12 @@ public class SelectServicePresenter extends AbstractWizardPage<NewServiceRequest
         };
     }
     
-    private String getAttributeValue(ProjectDescriptor projectDescriptor, String value) {
-        List<String> attributes = projectDescriptor.getAttributes().get(value);
+    private String getAttributeValue(ProjectConfigDto projectConfig, String value) {
+        List<String> attributes = projectConfig.getAttributes().get(value);
         if (attributes == null || attributes.isEmpty()) {
             return null;
         }
-        return projectDescriptor.getAttributes().get(value).get(0);
+        return projectConfig.getAttributes().get(value).get(0);
     }
     
     @Override
