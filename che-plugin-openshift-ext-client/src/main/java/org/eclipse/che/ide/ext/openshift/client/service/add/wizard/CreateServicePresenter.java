@@ -20,8 +20,8 @@ import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.WizardFactory;
 import org.eclipse.che.ide.ext.openshift.client.dto.NewServiceRequest;
 import org.eclipse.che.ide.ext.openshift.client.service.add.wizard.page.configure.ConfigureServicePresenter;
+import org.eclipse.che.ide.ext.openshift.client.service.add.wizard.page.configure.ConfigureServiceView;
 import org.eclipse.che.ide.ext.openshift.client.service.add.wizard.page.select.SelectServicePresenter;
-import org.eclipse.che.ide.ext.openshift.shared.dto.Service;
 import org.eclipse.che.ide.dto.DtoFactory;
 
 import javax.validation.constraints.NotNull;
@@ -35,7 +35,8 @@ public class CreateServicePresenter implements Wizard.UpdateDelegate, CreateServ
     private final DtoFactory                    dtoFactory;
     private final CreateServiceWizardView       view;
     private final SelectServicePresenter        selectPage;
-    private final ConfigureServicePresenter     configurePage;
+    private final ConfigureServicePresenter     configureServicePage;
+    private final ConfigureServiceView          configureServiceView;
 
     private CreateServiceWizard wizard;
     private WizardPage<NewServiceRequest>                 currentPage;
@@ -48,7 +49,8 @@ public class CreateServicePresenter implements Wizard.UpdateDelegate, CreateServ
                                   DtoFactory dtoFactory,
                                   CreateServiceWizardView view,
                                   SelectServicePresenter selectPage,
-                                  ConfigureServicePresenter configurePage) {
+                                  ConfigureServicePresenter configurePage,
+                                  ConfigureServiceView configureServiceView) {
 
         this.notificationManager = notificationManager;
         this.locale = locale;
@@ -56,7 +58,8 @@ public class CreateServicePresenter implements Wizard.UpdateDelegate, CreateServ
         this.dtoFactory = dtoFactory;
         this.view = view;
         this.selectPage = selectPage;
-        this.configurePage = configurePage;
+        this.configureServicePage = configurePage;
+        this.configureServiceView = configureServiceView;
 
         view.setDelegate(this);
     }
@@ -66,7 +69,7 @@ public class CreateServicePresenter implements Wizard.UpdateDelegate, CreateServ
         
         wizard.setUpdateDelegate(this);
         wizard.addPage(selectPage);
-        wizard.addPage(configurePage);
+        wizard.addPage(configureServicePage);
 
         final WizardPage<NewServiceRequest> firstPage = wizard.navigateToFirst();
         if (firstPage != null) {
@@ -106,35 +109,33 @@ public class CreateServicePresenter implements Wizard.UpdateDelegate, CreateServ
 
     @Override
     public void onCreateClicked() {
-        //configProjectPage.setEnabled(false);//TODO
-//        view.setPreviousButtonEnabled(false);
-//        view.setNextButtonEnabled(false);
-//        view.setCreateButtonEnabled(false);
-//        view.animateCreateButton(true);
-//        view.setBlocked(true);
-        configurePage.updateData();
+        configureServiceView.setEnabled(false);//TODO
+        view.setPreviousButtonEnabled(false);
+        view.setNextButtonEnabled(false);
+        view.setCreateButtonEnabled(false);
+        view.animateCreateButton(true);
+        view.setBlocked(true);
+        configureServicePage.updateData();
 
         wizard.complete(new Wizard.CompleteCallback() {
             @Override
             public void onCompleted() {
-                //configProjectPage.setEnabled(true);//TODO
                 updateControls();
-//                view.animateCreateButton(false);
-//                view.setBlocked(false);
+                view.animateCreateButton(false);
+                view.setBlocked(false);
 
-                notificationManager.showInfo(locale.createFromTemplateSuccess());
+                notificationManager.showInfo(locale.createServiceFromTemplateSuccess());
                 view.closeWizard();
             }
 
             @Override
             public void onFailure(Throwable e) {
-                //configurePage.setEnabled(true);
                 updateControls();
-//                view.animateCreateButton(false);
-//                view.setBlocked(false);
+                view.animateCreateButton(false);
+                view.setBlocked(false);
 
                 String message = e.getMessage() != null ? e.getMessage() : locale.createFromTemplateFailed();
-                notificationManager.showError(message);
+                notificationManager.showError(locale.createServiceFromTemplateFailed() + " " + message);
             }
         });
     }

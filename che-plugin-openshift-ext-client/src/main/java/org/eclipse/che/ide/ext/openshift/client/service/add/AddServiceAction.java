@@ -27,6 +27,11 @@ import java.util.Collections;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_PROJECT_TYPE_ID;
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
+/**
+ * Action for adding datasource service and link this service with che appliction.
+ *
+ * @author Alexander Andrienko
+ */
 @Singleton
 public class AddServiceAction extends AbstractPerspectiveAction {
     

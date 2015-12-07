@@ -30,6 +30,7 @@ import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftServiceClient;
 import org.eclipse.che.ide.ext.openshift.client.dto.NewServiceRequest;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Template;
+import org.eclipse.che.ide.util.loging.Log;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
@@ -68,6 +69,7 @@ public class SelectServicePresenter extends AbstractWizardPage<NewServiceRequest
     @Override
     public void init(NewServiceRequest dataObject) {
         super.init(dataObject);
+        template = null;
         
         ProjectConfigDto projectConfig = appContext.getCurrentProject().getRootProject();
         final String nameSpace = getAttributeValue(projectConfig, OPENSHIFT_NAMESPACE_VARIABLE_NAME);
@@ -85,7 +87,6 @@ public class SelectServicePresenter extends AbstractWizardPage<NewServiceRequest
                .catchError(handleError(nameSpace));
     } 
     
-    //TODO create class categoryFilter
     private Function<List<Template>, List<Template>> filterByCategory(@NotNull final String category) {
         return new Function<List<Template>, List<Template>>() {
             @Override
@@ -132,6 +133,10 @@ public class SelectServicePresenter extends AbstractWizardPage<NewServiceRequest
     
     @Override
     public boolean isCompleted() {
+        Log.info(getClass(),"####################" +  (template == null));
+        if (template != null) {
+            Log.info(getClass(),  "test");
+        }
         return template != null;
     }
 

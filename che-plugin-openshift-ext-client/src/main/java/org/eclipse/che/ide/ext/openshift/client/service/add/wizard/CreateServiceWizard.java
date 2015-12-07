@@ -35,6 +35,7 @@ import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.wizard.AbstractWizard;
 import org.eclipse.che.ide.dto.DtoFactory;
+import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftServiceClient;
 import org.eclipse.che.ide.ext.openshift.client.dto.NewServiceRequest;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Container;
@@ -48,41 +49,48 @@ import javax.validation.constraints.NotNull;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
 
 /**
- * //
+ * Create service wizard
  *
  * @author Alexander Andrienko
  */
-//todo maybe we can do it like singleton ?
 public class CreateServiceWizard extends AbstractWizard<NewServiceRequest> {
 
-    private final OpenshiftServiceClient openshiftServiceClient;
-    private final AppContext             appContext;
-    private final NotificationManager    notificationManager;
-    private final DtoFactory             dtoFactory;
+    private final OpenshiftServiceClient        openshiftServiceClient;
+    private final AppContext                    appContext;
+    private final DtoFactory                    dtoFactory;
 
-    private String nameSpace;
+    private String                              nameSpace;
 
     @Inject
     public CreateServiceWizard(@Assisted NewServiceRequest newServiceRequest,
                                OpenshiftServiceClient openshiftServiceClient,
                                AppContext appContext,
-                               NotificationManager notificationManager,
                                DtoFactory dtoFactory) {
         super(newServiceRequest);
         this.openshiftServiceClient = openshiftServiceClient;
         this.appContext = appContext;
-        this.notificationManager = notificationManager;
         this.dtoFactory = dtoFactory;
     }
 
     @Override
     public void complete(@NotNull CompleteCallback callback) {
+        
         ProjectConfigDto projectConfig = appContext.getCurrentProject().getRootProject();
         nameSpace = getAttributeValue(projectConfig, OPENSHIFT_NAMESPACE_VARIABLE_NAME);
 
         Template template = dataObject.getTemplate();
 
-        openshiftServiceClient.processTemplate(nameSpace, template).then(processTemplate()).catchError(handleError(nameSpace));
+        openshiftServiceClient.processTemplate(nameSpace, template).then(processTemplate())
+                                                                   .then(onSuccess(callback))
+                                                                   .catchError(handleError(callback));
+    }
+    
+     private String getAttributeValue(ProjectConfigDto projectConfig, String value) {
+        List<String> attributes = projectConfig.getAttributes().get(value);
+        if (attributes == null || attributes.isEmpty()) {
+            return null;
+        }
+        return projectConfig.getAttributes().get(value).get(0);
     }
 
     private Function<Template, Promise<JsArrayMixed>> processTemplate() {
@@ -90,7 +98,7 @@ public class CreateServiceWizard extends AbstractWizard<NewServiceRequest> {
             @Override
             public Promise<JsArrayMixed> apply(Template template) throws FunctionException {
                 List<Promise<?>> promiseList = new ArrayList<>();
-                for (Object object: template.getObjects()) {
+                for (Object object : template.getObjects()) {
                     JSONObject json = (JSONObject)object;
                     String kind = ((JSONString)json.get("kind")).stringValue();
                     switch (kind) {
@@ -122,28 +130,27 @@ public class CreateServiceWizard extends AbstractWizard<NewServiceRequest> {
                 final List<Container> containersForUpdate = serviceConfig.getSpec().getTemplate().getSpec().getContainers();
                 String applicationName = appContext.getCurrentProject().getRootProject().getName();
 
-                openshiftServiceClient.getDeploymentConfigs(nameSpace, applicationName)
-                                      .then(new Operation<List<DeploymentConfig>>() {
-                                          @Override
-                                          public void apply(List<DeploymentConfig> configs) throws OperationException {
-                                              for (DeploymentConfig config : configs) {
-                                                  List<Container> containers = config.getSpec().getTemplate().getSpec().getContainers();
+                openshiftServiceClient.getDeploymentConfigs(nameSpace, applicationName).then(new Operation<List<DeploymentConfig>>() {
+                    @Override
+                    public void apply(List<DeploymentConfig> configs) throws OperationException {
+                        for (DeploymentConfig config : configs) {
+                            List<Container> containers = config.getSpec().getTemplate().getSpec().getContainers();
 
-                                                  if (containers == null) {
-                                                      config.getSpec().getTemplate().getSpec().setContainers(containersForUpdate);
-                                                      return;
-                                                  }
+                            if (containers == null) {
+                                config.getSpec().getTemplate().getSpec().setContainers(containersForUpdate);
+                                return;
+                            }
 
-                                                  for (Container containerForUpdate: containersForUpdate) {
-                                                      for (Container container: containers) {
-                                                          updateContainerEnv(container, containerForUpdate.getEnv());
-                                                      }
-                                                  }
-                                                  config.getMetadata().getLabels().put("database", deploymentConfigName);
-                                                  updateApplicationDeploymentConfigsRecursive(configs.iterator());
-                                              }
-                                          }
-                                      });
+                            for (Container containerForUpdate : containersForUpdate) {
+                                for (Container container : containers) {
+                                    updateContainerEnv(container, containerForUpdate.getEnv());
+                                }
+                            }
+                            config.getMetadata().getLabels().put("database", deploymentConfigName);
+                            updateApplicationDeploymentConfigsRecursive(configs.iterator());
+                        }
+                    }
+                });
             }
         };
     }
@@ -156,18 +163,9 @@ public class CreateServiceWizard extends AbstractWizard<NewServiceRequest> {
                     updateApplicationDeploymentConfigsRecursive(configsIterator);
                 }
             });
-        } else {
-            notificationManager.showInfo("Datasource created!!!!");
         }
     }
 
-    private String getAttributeValue(ProjectConfigDto projectConfig, String value) {
-        List<String> attributes = projectConfig.getAttributes().get(value);
-        if (attributes == null || attributes.isEmpty()) {
-            return null;
-        }
-        return projectConfig.getAttributes().get(value).get(0);
-    }
     private void updateContainerEnv(Container container, List<EnvVar> envVariables) {
         List<EnvVar> containerEnvs = container.getEnv();
 
@@ -176,7 +174,7 @@ public class CreateServiceWizard extends AbstractWizard<NewServiceRequest> {
             return;
         }
 
-        for (final EnvVar envVarForEdit: envVariables) {
+        for (final EnvVar envVarForEdit : envVariables) {
             Optional<EnvVar> foundedEnv = findEnvVarByName(envVarForEdit.getName(), containerEnvs);
             if (foundedEnv.isPresent()) {
                 containerEnvs.remove(foundedEnv.get());
@@ -194,11 +192,20 @@ public class CreateServiceWizard extends AbstractWizard<NewServiceRequest> {
         });
     }
 
-    private Operation<PromiseError> handleError(final String nameSpace) {
+    private Operation<PromiseError> handleError(final CompleteCallback callback) {
         return new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError promiseError) throws OperationException {
-                notificationManager.showError("" + promiseError.getMessage());//TODO need message!!!!
+                callback.onFailure(promiseError.getCause());
+            }
+        };
+    }
+
+    private Operation<Promise<JsArrayMixed>> onSuccess(final CompleteCallback callback) {
+        return new Operation<Promise<JsArrayMixed>>() {
+            @Override
+            public void apply(Promise<JsArrayMixed> arg) throws OperationException {    
+                callback.onCompleted();
             }
         };
     }

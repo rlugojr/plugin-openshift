@@ -55,7 +55,7 @@
     font-weight: bold;
 }
 
-.smallButton, .deployApplicationTable button {
+.smallButton, .applicationTable button, .tableWithEmptyBorder button {
     padding: 0px 5px;
     height: 18px;
     line-height: 14px;
@@ -63,8 +63,12 @@
     font-weight: bold;
 }
 
-.deployApplicationTable {
+.applicationTable {
     border: 1px solid separatorColor;
+}
+
+.tableWithEmptyBorder {
+    border: 0px solid
 }
 
 .templateSection {
@@ -94,7 +98,6 @@
 
 .labelErrorPosition {
     color: errorEventColor;
-    font-weight: lighter;
     float: left;
 }
 

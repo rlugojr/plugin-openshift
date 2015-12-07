@@ -291,10 +291,28 @@ public interface OpenshiftLocalizationConstant extends Messages {
 
     @Key("project.successfully.reset")
     String projectSuccessfullyReset(String cheProjectName);
+    
+    @Key("create.service.from.template.success")
+    String createServiceFromTemplateSuccess();
+    
+    @Key("create.service.from.template.failed")
+    String createServiceFromTemplateFailed();
 
     @Key("project.is.not.linked.to.openshift.error")
     String projectIsNotLinkedToOpenShiftError(String projectName);
 
     @Key("get.list.templates.failed")
     String getListTemplatesFailed(String projectName);//todo
+
+    @Key("buildconfig.has.invalid.output.error")
+    String buildConfigHasInvalidOutputError();
+
+    @Key("buildconfig.has.invalid.tag.name.error")
+    String buildConfigHasInvalidTagName(String tagName);
+
+    @Key("imagestream.has.invalid.tag.error")
+    String imageSteamHasInvalidTagError(String imageStreamName, String tagName);
+
+    @Key("imagestream.does.not.have.tag.error")
+    String imageStreamDoesNotHaveAnyTag(String imageStreamName, String tagName);
 }

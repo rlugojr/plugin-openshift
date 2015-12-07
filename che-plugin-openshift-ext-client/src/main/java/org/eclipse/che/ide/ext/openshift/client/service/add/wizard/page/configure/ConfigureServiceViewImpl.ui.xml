@@ -14,8 +14,14 @@
              xmlns:g='urn:import:com.google.gwt.user.client.ui'>
     <ui:with field="resources" type="org.eclipse.che.ide.ext.openshift.client.OpenshiftResources"/>
     <ui:with field='locale' type='org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant'/>
+    
+    <ui:style>
+        .buttonIndend {
+            margin-right: 10px
+        }
+    </ui:style>
 
-    <g:DockLayoutPanel width="700px" height="450px" addStyleNames="{resources.css.marginH}">
+    <g:DockLayoutPanel width="669px" height="435px" addStyleNames="{resources.css.marginH}">
         <g:north size="24">
             <g:Label styleName="{resources.css.sectionTitle}" text="{locale.configureService}"/>
         </g:north>
@@ -28,22 +34,23 @@
                 </g:north>
                 <g:center>
                     <g:ScrollPanel>
-                        <g:FlowPanel ui:field="envVariablesPanel"/>
+                        <g:SimplePanel ui:field="envVariablesPanel"/>
                     </g:ScrollPanel>
                 </g:center>
             </g:DockLayoutPanel>
         </g:center>
-        <g:south size="200">
+        <g:south size="206">
             <g:DockLayoutPanel>
                 <g:north size="24">
-                    <g:FlowPanel>
+                    <g:FlowPanel addStyleNames="{style.buttonIndend}">
                         <g:Label text="{locale.configureServiceEnvironmentLabelsTableTitle}" addStyleNames="{resources.css.floatLeft}"/>
-                            <g:Button ui:field="addLabelButton" text="+" addStyleNames="{resources.css.smallButton} {resources.css.floatRight}"/>
+                        <g:Button ui:field="addLabelButton" text="+"
+                                  addStyleNames="{resources.css.smallButton} {resources.css.floatRight}"/>
                     </g:FlowPanel>
                 </g:north>
                 <g:center>
-                    <g:ScrollPanel>
-                        <g:FlowPanel ui:field="labelsPanel"/>
+                    <g:ScrollPanel addStyleNames="{resources.css.tableWithEmptyBorder}">
+                        <g:SimplePanel ui:field="labelsPanel"/>
                     </g:ScrollPanel>
                 </g:center>
             </g:DockLayoutPanel>

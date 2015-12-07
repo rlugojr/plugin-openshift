@@ -35,8 +35,8 @@
         }
 
     </ui:style>
-    <g:FlowPanel width="800px" height="470px" addStyleNames="{style.rootPanel}">
-        <g:FlowPanel width="800px" height="470px" addStyleNames="{style.centerPanel}">
+    <g:FlowPanel width="700px" height="450px" addStyleNames="{style.rootPanel}">
+        <g:FlowPanel width="700px" height="450px" addStyleNames="{style.centerPanel}">
             <g:SimplePanel ui:field="wizardPanel" addStyleNames="{style.tab}"/>
         </g:FlowPanel>
     </g:FlowPanel>

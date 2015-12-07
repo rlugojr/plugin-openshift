@@ -19,16 +19,20 @@
             margin: 8px;
             box-sizing: border-box;
         }
+
+        .wrapWords div {
+            white-space: normal;
+        }
     </ui:style>
-    <g:DockPanel width="800px" addStyleNames="{style.contentSpacing}">
+    <g:DockPanel width="700px" addStyleNames="{style.contentSpacing}">
         <g:Dock direction="NORTH">
             <g:Label ui:field="templatesLabel" text="Select Template" styleName="{resources.css.sectionTitle}"/>
         </g:Dock>
         <g:Dock direction="NORTH">
-            <g:AbsolutePanel height="420px" width="784px">
+            <g:AbsolutePanel height="380px" width="685px">
                 <g:Label ui:field="loadingCategoriesLabel" addStyleNames="{resources.css.loadingCategoriesLabel} {resources.css.flashingLabel}"
                          visible="false" text="{locale.createFromTemplateLoading}"/>
-                <g:ScrollPanel ui:field="templatePanel" width="100%" height="100%" />
+                <g:ScrollPanel ui:field="templatePanel" width="100%" height="100%" addStyleNames="{style.wrapWords}"/>
             </g:AbsolutePanel>
         </g:Dock>
     </g:DockPanel>

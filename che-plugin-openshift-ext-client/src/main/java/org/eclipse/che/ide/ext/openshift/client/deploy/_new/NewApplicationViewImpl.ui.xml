@@ -68,7 +68,7 @@
                         </g:FlowPanel>
                     </g:north>
                     <g:center>
-                        <g:ScrollPanel addStyleNames="{resources.css.deployApplicationTable}">
+                        <g:ScrollPanel addStyleNames="{resources.css.applicationTable}">
                             <g:SimplePanel>
                                 <c:CellTable ui:field='environmentVariables' width="100%" tableLayoutFixed="true"/>
                             </g:SimplePanel>
@@ -85,7 +85,7 @@
                         </g:FlowPanel>
                     </g:north>
                     <g:center>
-                        <g:ScrollPanel addStyleNames="{resources.css.deployApplicationTable}">
+                        <g:ScrollPanel addStyleNames="{resources.css.applicationTable}">
                             <g:SimplePanel>
                                 <c:CellTable ui:field='environmentLabels' width="100%" tableLayoutFixed="true"/>
                             </g:SimplePanel>

@@ -51,7 +51,9 @@ public interface OpenshiftResources extends ClientBundle {
 
         String smallButton();
 
-        String deployApplicationTable();
+        String applicationTable();
+        
+        String tableWithEmptyBorder();
 
         String templateSection();
 

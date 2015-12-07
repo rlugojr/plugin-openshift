@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * //
+ * This class is view representation of configurable page for datasource service
  *
  * @author Alexander Andrienko
  */
@@ -31,6 +31,8 @@ public interface ConfigureServiceView extends View<ConfigureServiceView.ActionDe
     void setEnvironmentLabels(Map<String, String> labels);
 
     Map<String, String> getEnvironmentLabels();
+
+    void setEnabled(boolean enabled);
 
     interface ActionDelegate {
     }

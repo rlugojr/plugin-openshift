@@ -16,7 +16,6 @@ import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
 import org.eclipse.che.ide.ext.openshift.client.dto.NewServiceRequest;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Parameter;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Template;
-import org.eclipse.che.ide.util.loging.Log;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Singleton;
@@ -50,13 +49,6 @@ public class ConfigureServicePresenter extends AbstractWizardPage<NewServiceRequ
     public void updateData() {
         Template template = dataObject.getTemplate();
         template.setLabels(view.getEnvironmentLabels());
-
-        for (Parameter parameter: template.getParameters()) {
-            Log.info(getClass(), "****" + parameter.getName() + " " + parameter.getValue());
-        }
-
-        for (Map.Entry<String, String> map: template.getLabels().entrySet()) {
-            Log.info(getClass(), "####" + map.getKey() + " " + map.getValue());
-        }
     }
+
 }
