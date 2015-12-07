@@ -32,6 +32,7 @@ import org.eclipse.che.ide.ext.openshift.shared.dto.WebHook;
 import org.eclipse.che.ide.rest.AsyncRequestFactory;
 import org.eclipse.che.ide.rest.AsyncRequestLoader;
 import org.eclipse.che.ide.rest.DtoUnmarshallerFactory;
+import org.eclipse.che.ide.util.loging.Log;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -251,16 +252,11 @@ public class OpenshiftServiceClientImpl implements OpenshiftServiceClient {
 
     @Override
     public Promise<DeploymentConfig> createDeploymentConfig(final DeploymentConfig config) {
-        return createDeploymentConfig(config.getMetadata().getNamespace(), config);
-    }
-
-    @Override
-    public Promise<DeploymentConfig> createDeploymentConfig(final String namespace, final DeploymentConfig config) {
         return newPromise(new AsyncPromiseHelper.RequestCall<DeploymentConfig>() {
             @Override
             public void makeCall(AsyncCallback<DeploymentConfig> callback) {
                 asyncRequestFactory
-                        .createPostRequest(openshiftPath + "/namespace/" + namespace + "/deploymentconfig",
+                        .createPostRequest(openshiftPath + "/namespace/" + config.getMetadata().getNamespace() + "/deploymentconfig",
                                            config)
                         .header(CONTENT_TYPE, MimeType.APPLICATION_JSON)
                         .header(ACCEPT, MimeType.APPLICATION_JSON)
@@ -284,16 +280,11 @@ public class OpenshiftServiceClientImpl implements OpenshiftServiceClient {
 
     @Override
     public Promise<Service> createService(final Service service) {
-        return createService(service.getMetadata().getNamespace(), service);
-    }
-
-    @Override
-    public Promise<Service> createService(final String namespace, final Service service) {
         return newPromise(new AsyncPromiseHelper.RequestCall<Service>() {
             @Override
             public void makeCall(AsyncCallback<Service> callback) {
                 asyncRequestFactory
-                        .createPostRequest(openshiftPath + "/namespace/" + namespace + "/service", service)
+                        .createPostRequest(openshiftPath + "/namespace/" + service.getMetadata().getNamespace() + "/service", service)
                         .header(CONTENT_TYPE, MimeType.APPLICATION_JSON)
                         .header(ACCEPT, MimeType.APPLICATION_JSON)
                         .send(newCallback(callback, dtoUnmarshaller.newUnmarshaller(Service.class)));
@@ -377,6 +368,38 @@ public class OpenshiftServiceClientImpl implements OpenshiftServiceClient {
                                    .header(ACCEPT, MimeType.APPLICATION_JSON)
                                    .loader(loader, "Updating replication controller...")
                                    .send(newCallback(callback, dtoUnmarshaller.newUnmarshaller(ReplicationController.class)));
+            }
+        });
+    }
+
+    @Override
+    public Promise<DeploymentConfig> updateDeploymentConfig(final DeploymentConfig config) {
+        return newPromise(new AsyncPromiseHelper.RequestCall<DeploymentConfig>() {
+            @Override
+            public void makeCall(AsyncCallback<DeploymentConfig> callback) {
+                asyncRequestFactory
+                        .createRequest(PUT, openshiftPath + "/namespace/" + config.getMetadata().getNamespace() + "/deploymentconfig/" +
+                                            config.getMetadata().getName(), config, false)
+                        .header(CONTENT_TYPE, MimeType.APPLICATION_JSON)
+                        .header(ACCEPT, MimeType.APPLICATION_JSON)
+                        .send(newCallback(callback, dtoUnmarshaller.newUnmarshaller(DeploymentConfig.class)));
+            }
+        });
+    }
+
+    @Override
+    public Promise<List<DeploymentConfig>> getDeploymentConfigs(final String namespace, final String application) {
+        return newPromise(new AsyncPromiseHelper.RequestCall<List<DeploymentConfig>>() {
+            @Override
+            public void makeCall(AsyncCallback<List<DeploymentConfig>> callback) {
+                String url = openshiftPath + "/namespace/" + namespace + "/deploymentconfig";
+                if (application != null) {
+                    url += "?application=" + application;
+                }
+                asyncRequestFactory.createGetRequest(url)
+                                   .header(CONTENT_TYPE, MimeType.APPLICATION_JSON)
+                                   .header(ACCEPT, MimeType.APPLICATION_JSON)
+                                   .send(newCallback(callback, dtoUnmarshaller.newListUnmarshaller(DeploymentConfig.class)));
             }
         });
     }

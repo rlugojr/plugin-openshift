@@ -61,13 +61,9 @@ public interface OpenshiftServiceClient {
 
     Promise<DeploymentConfig> createDeploymentConfig(DeploymentConfig config);
 
-    Promise<DeploymentConfig> createDeploymentConfig(String nameSpace, DeploymentConfig config);
-
     Promise<Route> createRoute(Route route);
 
     Promise<Service> createService(Service service);
-
-    Promise<Service> createService(String namespace, Service service);
 
     Promise<List<Route>> getRoutes(String namespace, String application);
 
@@ -78,4 +74,8 @@ public interface OpenshiftServiceClient {
     Promise<List<ReplicationController>> getReplicationControllers(String namespace, String application);
 
     Promise<ReplicationController> updateReplicationController(ReplicationController controller);
+
+    Promise<DeploymentConfig> updateDeploymentConfig(DeploymentConfig deploymentConfig);
+
+    Promise<List<DeploymentConfig>> getDeploymentConfigs(String namespace, String application);
 }
