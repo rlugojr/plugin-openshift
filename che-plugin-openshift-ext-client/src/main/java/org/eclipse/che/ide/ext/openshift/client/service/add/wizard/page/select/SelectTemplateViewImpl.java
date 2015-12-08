@@ -15,8 +15,6 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
-import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftResources;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Template;
 import org.eclipse.che.ide.ui.list.SimpleList;
@@ -36,61 +34,58 @@ import com.google.gwt.user.client.ui.Widget;
 
 import org.eclipse.che.ide.util.dom.Elements;
 
+/**
+ * Implementation of {@link SelectTemplateView}
+ *
+ */
 @Singleton
-public class SelectServiceViewImpl implements SelectServiceView {
+public class SelectTemplateViewImpl implements SelectTemplateView {
 
-    interface SelectServiceViewUiBinder extends UiBinder<DockPanel, SelectServiceViewImpl> {
+    interface SelectServiceViewUiBinder extends UiBinder<DockPanel, SelectTemplateViewImpl> {
     }
 
     @UiField
-    Label                                 templatesLabel;
+    Label templatesLabel;
 
     @UiField
-    Label                                 loadingCategoriesLabel;
+    Label loadingCategoriesLabel;
 
     @UiField
-    ScrollPanel                           templatePanel;
+    ScrollPanel templatePanel;
 
     private SimpleList<Template>          templateList;
     private ActionDelegate                delegate;
     private DockPanel                     widget;
-    private DtoFactory                    dtoFactory;
-    private OpenshiftLocalizationConstant localizationConstant;
 
     @Inject
-    public SelectServiceViewImpl(SelectServiceViewUiBinder uiBinder,
-                                 Resources resources,
-                                 final OpenshiftResources openshiftResources,
-                                 final OpenshiftLocalizationConstant localizationConstant,
-                                 DtoFactory dtoFactory) {
+    public SelectTemplateViewImpl(SelectServiceViewUiBinder uiBinder,
+                                  Resources resources,
+                                  final OpenshiftResources openshiftResources) {
         widget = uiBinder.createAndBindUi(this);
-
-        this.dtoFactory = dtoFactory;
-        this.localizationConstant = localizationConstant;
 
         TableElement breakPointsElement = Elements.createTableElement();
         breakPointsElement.setAttribute("style", "width: 100%");
 
-        templateList =
-                       SimpleList.create((SimpleList.View)breakPointsElement, resources.defaultSimpleListCss(),
+        templateList = SimpleList.create((SimpleList.View)breakPointsElement, resources.defaultSimpleListCss(),
                                          new SimpleList.ListItemRenderer<Template>() {
-
                                              @Override
                                              public void render(Element element, Template template) {
                                                  String tags = template.getMetadata().getAnnotations().get("tags");
                                                  tags = (tags != null) ? tags.replace(",", " ") : "";
 
                                                  DivElement title = Elements.createDivElement(openshiftResources.css()
-                                                                                                               .templateSectionTitle());
+                                                                                                                .templateSectionTitle());
                                                  title.setTextContent(template.getMetadata().getName());
                                                  element.appendChild(title);
 
-                                                 DivElement description = Elements.createDivElement(openshiftResources.css().templateSectionDescription());
+                                                 DivElement description =
+                                                         Elements.createDivElement(openshiftResources.css().templateSectionDescription());
                                                  description.setTextContent(template.getMetadata().getAnnotations().get("description"));
                                                  element.appendChild(description);
 
                                                  DivElement namespace = Elements.createDivElement();
-                                                 SpanElement namespaceTitle = Elements.createSpanElement(openshiftResources.css().templateSectionSecondary());
+                                                 SpanElement namespaceTitle =
+                                                         Elements.createSpanElement(openshiftResources.css().templateSectionSecondary());
                                                  namespaceTitle.setTextContent("Namespace:");
                                                  namespaceTitle.getStyle().setMarginRight(10, "px");
                                                  namespace.appendChild(namespaceTitle);
@@ -100,7 +95,8 @@ public class SelectServiceViewImpl implements SelectServiceView {
                                                  element.appendChild(namespace);
 
                                                  DivElement tag = Elements.createDivElement(openshiftResources.css().templateSectionTags(),
-                                                                                            openshiftResources.css().templateSectionSecondary());
+                                                                                            openshiftResources.css()
+                                                                                                              .templateSectionSecondary());
                                                  tag.setTextContent(tags);
                                                  element.appendChild(tag);
 
@@ -108,21 +104,21 @@ public class SelectServiceViewImpl implements SelectServiceView {
                                              }
                                          }, new SimpleList.ListEventDelegate<Template>() {
 
-                                             @Override
-                                             public void onListItemClicked(Element listItemBase, Template itemData) {
-                                                 templateList.getSelectionModel().setSelectedItem(itemData);
-                                                 delegate.onTemplateSelected(itemData);
-                                             }
+                    @Override
+                    public void onListItemClicked(Element listItemBase, Template itemData) {
+                        templateList.getSelectionModel().setSelectedItem(itemData);
+                        delegate.onTemplateSelected(itemData);
+                    }
 
-                                             @Override
-                                             public void onListItemDoubleClicked(Element listItemBase, Template itemData) {
-                                                 //do nothing
-                                             }
-                                         });
+                    @Override
+                    public void onListItemDoubleClicked(Element listItemBase, Template itemData) {
+                        //do nothing
+                    }
+                });
 
         templatePanel.add(templateList);
     }
-    
+
 
     /** {@inheritDoc} */
     @Override
@@ -135,7 +131,7 @@ public class SelectServiceViewImpl implements SelectServiceView {
     public Widget asWidget() {
         return widget;
     }
-    
+
     @Override
     public void showLoadingTemplates() {
         // hide templates list
@@ -157,5 +153,4 @@ public class SelectServiceViewImpl implements SelectServiceView {
 
         templateList.render(templates);
     }
-    
 }

@@ -16,6 +16,8 @@ import org.eclipse.che.ide.api.mvp.View;
 import com.google.inject.ImplementedBy;
 
 /**
+ * Wizard View for creating datasource service from template
+ *
  */
 @ImplementedBy(CreateServiceWizardViewImpl.class)
 public interface CreateServiceWizardView extends View<CreateServiceWizardView.ActionDelegate>{

@@ -28,7 +28,7 @@ import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConst
 import static org.eclipse.che.ide.workspace.perspectives.project.ProjectPerspective.PROJECT_PERSPECTIVE_ID;
 
 /**
- * Action for adding datasource service and link this service with che appliction.
+ * Action for adding datasource service and link this service with che application.
  *
  * @author Alexander Andrienko
  */

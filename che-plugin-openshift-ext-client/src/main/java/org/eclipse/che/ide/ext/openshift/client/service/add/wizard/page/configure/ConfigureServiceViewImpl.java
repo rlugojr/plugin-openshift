@@ -12,15 +12,18 @@ package org.eclipse.che.ide.ext.openshift.client.service.add.wizard.page.configu
 
 import javax.inject.Inject;
 
+import com.google.common.base.Predicate;
 import com.google.gwt.cell.client.ButtonCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.cell.client.FieldUpdater;
 import com.google.gwt.cell.client.TextCell;
 import com.google.gwt.cell.client.TextInputCell;
+import com.google.gwt.cell.client.ValueUpdater;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.BrowserEvents;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.i18n.client.HasDirection.Direction;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
@@ -32,11 +35,8 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
-import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment.HorizontalAlignmentConstant;
 import com.google.gwt.user.client.ui.SimplePanel;
-import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.inject.Singleton;
@@ -44,18 +44,21 @@ import com.google.inject.Singleton;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftResources;
 import org.eclipse.che.ide.ext.openshift.client.deploy._new.KeyValue;
+import org.eclipse.che.ide.ext.openshift.client.util.OpenShiftValidator;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Parameter;
-import org.eclipse.che.ide.ext.openshift.shared.dto.Template;
 import org.eclipse.che.ide.ui.cellview.CellTableResources;
-import org.eclipse.che.ide.ui.menu.PositionController.HorizontalAlign;
 import org.eclipse.che.ide.ui.window.Window;
-import org.eclipse.che.ide.util.loging.Log;
+import com.google.gwt.dom.client.Element;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Implementation of {@link ConfigureServiceView}
+ *
+ */
 @Singleton
 public class ConfigureServiceViewImpl extends Window implements ConfigureServiceView {
 
@@ -82,6 +85,7 @@ public class ConfigureServiceViewImpl extends Window implements ConfigureService
 
     private ListDataProvider<KeyValue> labelsProvider;
     private CellTable<KeyValue>        labelsTable;
+    private ActionDelegate             delegate;
 
     @Inject
     public ConfigureServiceViewImpl(CellTableResources cellTableResources,
@@ -99,7 +103,14 @@ public class ConfigureServiceViewImpl extends Window implements ConfigureService
         envVariablesPanel.add(envVariablesTable);
 
         labelsProvider = new ListDataProvider<>();
-        labelsTable = createLabelsTable(cellTableResources);
+
+        Predicate<String> labelsPredicate = new Predicate<String>() {
+            @Override
+            public boolean apply(String input) {
+                return OpenShiftValidator.isLabelValid(input);
+            }
+        };
+        labelsTable = createLabelsTable(cellTableResources, labelsPredicate);
         labelsPanel.add(labelsTable);
     }
 
@@ -138,13 +149,22 @@ public class ConfigureServiceViewImpl extends Window implements ConfigureService
         return envVariablesTable;
     }
     
-    private CellTable<KeyValue> createLabelsTable(CellTableResources tableResources) {
+    private CellTable<KeyValue> createLabelsTable(CellTableResources tableResources,
+                                                  final Predicate<String> labelValidator) {
         labelsTable = new CellTable<>(50, tableResources);
         labelsTable.setTableLayoutFixed(true);
         labelsTable.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.DISABLED);
         labelsProvider.addDataDisplay(labelsTable);
 
-        final Column<KeyValue, String> keyColumn = new Column<KeyValue, String>(new TextInputCellWithPlaceHolder("Name")) {
+        final Column<KeyValue, String> keyColumn = new Column<KeyValue, String>(new TextInputCellCustom("Name", labelValidator)) {
+            @Override
+            public String getCellStyleNames(Cell.Context context, KeyValue object) {
+                if (!labelValidator.apply(object.getKey())) {
+                    return resources.css().deployApplicationTableError();
+                }
+                return null;
+            }
+
             @Override
             public String getValue(KeyValue keyValue) {
                 return keyValue.getKey();
@@ -158,7 +178,16 @@ public class ConfigureServiceViewImpl extends Window implements ConfigureService
                 }
             }
         });
-        Column<KeyValue, String> valueColumn = new Column<KeyValue, String>(new TextInputCellWithPlaceHolder("Value")) {
+
+        Column<KeyValue, String> valueColumn = new Column<KeyValue, String>(new TextInputCellCustom("Value", labelValidator)) {
+            @Override
+            public String getCellStyleNames(Cell.Context context, KeyValue object) {
+                if (!labelValidator.apply(object.getKey())) {
+                    return resources.css().deployApplicationTableError();
+                }
+                return null;
+            }
+
             @Override
             public String getValue(KeyValue keyValue) {
                 return keyValue.getValue();
@@ -203,9 +232,52 @@ public class ConfigureServiceViewImpl extends Window implements ConfigureService
         return labelsTable;
     }
 
+    interface Template extends SafeHtmlTemplates {
+        @Template("<input type=\"text\" value=\"{0}\" placeholder=\"{1}\" tabindex=\"-1\" ></input>")
+        SafeHtml input(final String value, final String placeHolder);
+    }
+
+    private class TextInputCellCustom extends TextInputCell {
+
+        private String   placeHolder;
+        private Template template;
+        private Predicate<String> keyValidator;
+
+        private TextInputCellCustom(String placeHolder, Predicate<String> keyValidator) {
+            this.placeHolder = placeHolder;
+            this.keyValidator = keyValidator;
+
+            this.template = GWT.create(Template.class);
+        }
+
+        @Override
+        public void onBrowserEvent(Context context, Element parent, String value, NativeEvent event, ValueUpdater<String> valueUpdater) {
+            super.onBrowserEvent(context, parent, value, event, valueUpdater);
+            if (event.getType().equals(BrowserEvents.KEYUP)) {
+                String newValue = getInputElement(parent).getValue();
+                if (!keyValidator.apply(newValue)) {
+                    parent.getParentElement().addClassName(resources.css().deployApplicationTableError());//todo rename
+                } else {
+                    parent.getParentElement().removeClassName(resources.css().deployApplicationTableError());//todo rename
+                }
+                valueUpdater.update(newValue);
+                delegate.updateControls();
+            }
+        }
+
+        @Override
+        public void render(Context context, String value, SafeHtmlBuilder sb) {
+            if (value == null) {
+                sb.append(template.input("", placeHolder));
+            } else {
+                sb.append(template.input(value, placeHolder));
+            }
+        }
+    }
+
     @Override
     public void setDelegate(ActionDelegate delegate) {
-        // do nothing
+        this.delegate = delegate;
     }
 
     @Override
@@ -242,7 +314,8 @@ public class ConfigureServiceViewImpl extends Window implements ConfigureService
 
     @UiHandler("addLabelButton")
     public void onAddLabelButtonClicked(ClickEvent clickEvent) {
-        labelsProvider.getList().add(new KeyValue("", ""));
+        labelsProvider.getList().add(0, new KeyValue("", ""));
+        labelsProvider.refresh();
     }
 
     @Override

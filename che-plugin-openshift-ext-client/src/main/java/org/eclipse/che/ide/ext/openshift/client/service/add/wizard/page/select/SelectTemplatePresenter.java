@@ -16,14 +16,12 @@ import java.util.List;
 import javax.inject.Singleton;
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.che.api.core.model.workspace.ProjectConfig;
 import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
 import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
-import org.eclipse.che.api.promises.client.js.JsPromise;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -32,33 +30,37 @@ import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftServiceClient;
 import org.eclipse.che.ide.ext.openshift.client.dto.NewServiceRequest;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Template;
-import org.eclipse.che.ide.util.loging.Log;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Inject;
 
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
 
+/**
+ * Presenter which handles logic for selection templates
+ *
+ * @author Alexander Andrienko
+ */
 @Singleton
-public class SelectServicePresenter extends AbstractWizardPage<NewServiceRequest> implements SelectServiceView.ActionDelegate {
+public class SelectTemplatePresenter extends AbstractWizardPage<NewServiceRequest> implements SelectTemplateView.ActionDelegate {
 
-    private final SelectServiceView             view;
+    private final SelectTemplateView            view;
     private final OpenshiftServiceClient        client;
     private final NotificationManager           notificationManager;
     private final AppContext                    appContext;
     private final OpenshiftLocalizationConstant locale;
 
-    public static final  String DEF_NAMESPACE = "openshift";//todo
-    private static final String DATABASE_TAG  = "database";//todo
+    public static final  String DEF_NAMESPACE = "openshift";
+    private static final String DATABASE_TAG  = "database";
     
     private Template template;
 
     @Inject
-    public SelectServicePresenter(SelectServiceView view,
-                                  OpenshiftServiceClient client,
-                                  NotificationManager notificationManager,
-                                  AppContext appContext,
-                                  OpenshiftLocalizationConstant locale) {
+    public SelectTemplatePresenter(SelectTemplateView view,
+                                   OpenshiftServiceClient client,
+                                   NotificationManager notificationManager,
+                                   AppContext appContext,
+                                   OpenshiftLocalizationConstant locale) {
         this.view = view;
         this.client = client;
         this.notificationManager = notificationManager;
@@ -77,17 +79,23 @@ public class SelectServicePresenter extends AbstractWizardPage<NewServiceRequest
         final String nameSpace = getAttributeValue(projectConfig, OPENSHIFT_NAMESPACE_VARIABLE_NAME);
 
         view.showLoadingTemplates();
-//todo
-        client.getTemplates(DEF_NAMESPACE)
-               .then(filterByCategory(DATABASE_TAG))
-               .then(addTemplates())
-               .catchError(handleError(DEF_NAMESPACE));
 
-        client.getTemplates(nameSpace)
-               .then(filterByCategory(DATABASE_TAG))
-               .then(addTemplates())
-               .catchError(handleError(nameSpace));
-    } 
+        List<Template> allTemplates = new ArrayList<>();
+        getTemplates(DEF_NAMESPACE, allTemplates).then(getTemplates(nameSpace, allTemplates))
+                                                 .then(filterByCategory(DATABASE_TAG))
+                                                 .then(addTemplates())
+                                                 .catchError(handleError());
+    }
+
+    private Promise<List<Template>> getTemplates(String nameSpace, final List<Template> allTemplates) {
+        return client.getTemplates(nameSpace).then(new Function<List<Template>, List<Template>>() {
+            @Override
+            public List<Template> apply(List<Template> templates) throws FunctionException {
+                allTemplates.addAll(templates);
+                return allTemplates;
+            }
+        });
+    }
     
     private Function<List<Template>, List<Template>> filterByCategory(@NotNull final String category) {
         return new Function<List<Template>, List<Template>>() {
@@ -116,11 +124,11 @@ public class SelectServicePresenter extends AbstractWizardPage<NewServiceRequest
         };
     }
     
-     private Operation<PromiseError> handleError(final String nameSpace) {
+     private Operation<PromiseError> handleError() {
         return new Operation<PromiseError>() {
             @Override
             public void apply(PromiseError promiseError) throws OperationException {
-                notificationManager.showError(locale.getListTemplatesFailed(nameSpace) + " " + promiseError.getMessage());
+                notificationManager.showError(locale.getListTemplatesFailed() + " " + promiseError.getMessage());
             }
         };
     }
@@ -143,11 +151,6 @@ public class SelectServicePresenter extends AbstractWizardPage<NewServiceRequest
         this.template = template;
         dataObject.setTemplate(template);
         updateDelegate.updateControls();
-    }
-
-    @Override
-    public boolean canSkip() {//todo
-        return false;
     }
 
     @Override

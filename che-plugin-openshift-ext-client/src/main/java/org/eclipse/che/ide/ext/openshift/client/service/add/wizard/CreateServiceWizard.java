@@ -47,7 +47,7 @@ import javax.validation.constraints.NotNull;
 import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConstants.OPENSHIFT_NAMESPACE_VARIABLE_NAME;
 
 /**
- * Create service wizard
+ * Create datasource service wizard
  *
  * @author Alexander Andrienko
  */

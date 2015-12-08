@@ -302,7 +302,7 @@ public interface OpenshiftLocalizationConstant extends Messages {
     String projectIsNotLinkedToOpenShiftError(String projectName);
 
     @Key("get.list.templates.failed")
-    String getListTemplatesFailed(String projectName);//todo
+    String getListTemplatesFailed();
 
     @Key("buildconfig.has.invalid.output.error")
     String buildConfigHasInvalidOutputError();

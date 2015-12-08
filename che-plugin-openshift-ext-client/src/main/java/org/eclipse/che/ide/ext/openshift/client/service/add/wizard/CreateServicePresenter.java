@@ -21,7 +21,7 @@ import org.eclipse.che.ide.ext.openshift.client.WizardFactory;
 import org.eclipse.che.ide.ext.openshift.client.dto.NewServiceRequest;
 import org.eclipse.che.ide.ext.openshift.client.service.add.wizard.page.configure.ConfigureServicePresenter;
 import org.eclipse.che.ide.ext.openshift.client.service.add.wizard.page.configure.ConfigureServiceView;
-import org.eclipse.che.ide.ext.openshift.client.service.add.wizard.page.select.SelectServicePresenter;
+import org.eclipse.che.ide.ext.openshift.client.service.add.wizard.page.select.SelectTemplatePresenter;
 import org.eclipse.che.ide.dto.DtoFactory;
 
 import javax.validation.constraints.NotNull;
@@ -38,7 +38,7 @@ public class CreateServicePresenter implements Wizard.UpdateDelegate, CreateServ
     private final WizardFactory                 wizardFactory;
     private final DtoFactory                    dtoFactory;
     private final CreateServiceWizardView       view;
-    private final SelectServicePresenter        selectPage;
+    private final SelectTemplatePresenter       selectPage;
     private final ConfigureServicePresenter     configureServicePage;
     private final ConfigureServiceView          configureServiceView;
 
@@ -51,7 +51,7 @@ public class CreateServicePresenter implements Wizard.UpdateDelegate, CreateServ
                                   WizardFactory wizardFactory,
                                   DtoFactory dtoFactory,
                                   CreateServiceWizardView view,
-                                  SelectServicePresenter selectPage,
+                                  SelectTemplatePresenter selectPage,
                                   ConfigureServicePresenter configurePage,
                                   ConfigureServiceView configureServiceView) {
 
@@ -98,7 +98,7 @@ public class CreateServicePresenter implements Wizard.UpdateDelegate, CreateServ
     public void updateControls() {
         view.setPreviousButtonEnabled(wizard.hasPrevious());
         view.setNextButtonEnabled(wizard.hasNext() && currentPage.isCompleted());
-        view.setCreateButtonEnabled(wizard.canComplete() && !currentPage.equals(wizard.getFirstPage()));//&& currentPage.canSkip()  check it!!!!!
+        view.setCreateButtonEnabled(wizard.canComplete() && !currentPage.equals(wizard.getFirstPage()));
     }
 
     @Override

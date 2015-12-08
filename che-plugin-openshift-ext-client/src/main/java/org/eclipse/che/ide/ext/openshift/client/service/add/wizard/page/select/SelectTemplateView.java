@@ -17,8 +17,12 @@ import org.eclipse.che.ide.api.mvp.View;
 
 import com.google.inject.ImplementedBy;
 
-@ImplementedBy(SelectServiceViewImpl.class)
-public interface SelectServiceView  extends View<SelectServiceView.ActionDelegate> {
+/**
+ * The view of {@link SelectTemplatePresenter}
+ *
+ */
+@ImplementedBy(SelectTemplateViewImpl.class)
+public interface SelectTemplateView extends View<SelectTemplateView.ActionDelegate> {
       /**
      * Hides template list and shows template loader.
      */

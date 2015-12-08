@@ -27,6 +27,8 @@ import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ui.window.Window;
 
 /**
+ * Implementation of {@link CreateServiceWizardView}
+ *
  */
 @Singleton
 public class CreateServiceWizardViewImpl extends Window implements CreateServiceWizardView {

@@ -16,6 +16,7 @@ import org.eclipse.che.ide.api.wizard.AbstractWizardPage;
 import org.eclipse.che.ide.ext.openshift.client.dto.NewServiceRequest;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Parameter;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Template;
+import org.eclipse.che.ide.util.loging.Log;
 
 import com.google.gwt.user.client.ui.AcceptsOneWidget;
 import com.google.inject.Singleton;
@@ -24,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Presenter for confederate datasource service
+ * Presenter for configure datasource service
  *
  * @author Andrienko Alexander
  */
@@ -59,4 +60,10 @@ public class ConfigureServicePresenter extends AbstractWizardPage<NewServiceRequ
         template.setLabels(view.getEnvironmentLabels());
     }
 
+    @Override
+    public void updateControls() {
+        Log.info(getClass(), "update control");
+        //todo !!!!!!
+    }
 }
+

@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This class is view representation of configurable page for datasource service
+ * View representation of configurable page for datasource service
  *
  * @author Alexander Andrienko
  */
@@ -35,5 +35,8 @@ public interface ConfigureServiceView extends View<ConfigureServiceView.ActionDe
     void setEnabled(boolean enabled);
 
     interface ActionDelegate {
+
+        void updateControls();
+
     }
 }
