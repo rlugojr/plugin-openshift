@@ -21,7 +21,9 @@ import org.eclipse.che.api.promises.client.Function;
 import org.eclipse.che.api.promises.client.FunctionException;
 import org.eclipse.che.api.promises.client.Operation;
 import org.eclipse.che.api.promises.client.OperationException;
+import org.eclipse.che.api.promises.client.Promise;
 import org.eclipse.che.api.promises.client.PromiseError;
+import org.eclipse.che.api.promises.client.js.JsPromise;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
 import org.eclipse.che.ide.api.notification.NotificationManager;
@@ -75,7 +77,7 @@ public class SelectServicePresenter extends AbstractWizardPage<NewServiceRequest
         final String nameSpace = getAttributeValue(projectConfig, OPENSHIFT_NAMESPACE_VARIABLE_NAME);
 
         view.showLoadingTemplates();
-
+//todo
         client.getTemplates(DEF_NAMESPACE)
                .then(filterByCategory(DATABASE_TAG))
                .then(addTemplates())
@@ -133,10 +135,6 @@ public class SelectServicePresenter extends AbstractWizardPage<NewServiceRequest
     
     @Override
     public boolean isCompleted() {
-        Log.info(getClass(),"####################" +  (template == null));
-        if (template != null) {
-            Log.info(getClass(),  "test");
-        }
         return template != null;
     }
 

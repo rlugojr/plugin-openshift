@@ -23,6 +23,11 @@ import com.google.inject.Singleton;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Presenter for confederate datasource service
+ *
+ * @author Andrienko Alexander
+ */
 @Singleton
 public class ConfigureServicePresenter extends AbstractWizardPage<NewServiceRequest> implements ConfigureServiceView.ActionDelegate {
 
@@ -46,6 +51,9 @@ public class ConfigureServicePresenter extends AbstractWizardPage<NewServiceRequ
         view.setEnvironmentLabels(labels);
     }
 
+    /**
+     * Update labels in data object
+     */
     public void updateData() {
         Template template = dataObject.getTemplate();
         template.setLabels(view.getEnvironmentLabels());

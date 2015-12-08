@@ -16,6 +16,11 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
+/**
+ * Custom TextInputCell with placeholder
+ *
+ * @author Alexander Andrienko
+ */
 public class TextInputCellWithPlaceHolder extends TextInputCell {
 
     private String   placeHolder;

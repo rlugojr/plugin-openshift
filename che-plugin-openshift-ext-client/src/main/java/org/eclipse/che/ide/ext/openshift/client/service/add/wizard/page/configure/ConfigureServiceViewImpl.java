@@ -77,8 +77,6 @@ public class ConfigureServiceViewImpl extends Window implements ConfigureService
     @UiField
     Button    addLabelButton;
 
-    private ActionDelegate              delegate;
-
     private ListDataProvider<Parameter> envVariablesProvider;
     private CellTable<Parameter>        envVariablesTable;
 
@@ -96,7 +94,6 @@ public class ConfigureServiceViewImpl extends Window implements ConfigureService
         ensureDebugId("create-service");
         setWidget(uiBinder.createAndBindUi(this));
 
-        //todo
         envVariablesProvider = new ListDataProvider<>();
         envVariablesTable = createVariablesTable(cellTableResources);
         envVariablesPanel.add(envVariablesTable);
@@ -208,7 +205,7 @@ public class ConfigureServiceViewImpl extends Window implements ConfigureService
 
     @Override
     public void setDelegate(ActionDelegate delegate) {
-        this.delegate = delegate;
+        // do nothing
     }
 
     @Override
@@ -236,7 +233,9 @@ public class ConfigureServiceViewImpl extends Window implements ConfigureService
     public Map<String, String> getEnvironmentLabels() {
         Map<String, String> mapLabels = new HashMap<>();
         for(KeyValue keyValue: labelsProvider.getList()) {
-            mapLabels.put(keyValue.getKey(), keyValue.getValue());
+            if (!keyValue.getKey().isEmpty() && !keyValue.getValue().isEmpty()) {
+                mapLabels.put(keyValue.getKey(), keyValue.getValue());
+            }
         }
         return mapLabels;
     }
@@ -249,9 +248,5 @@ public class ConfigureServiceViewImpl extends Window implements ConfigureService
     @Override
     public void setEnabled(boolean enabled) {
         setBlocked(enabled);
-    }
-
-    private void validateLableName() {
-
     }
 }

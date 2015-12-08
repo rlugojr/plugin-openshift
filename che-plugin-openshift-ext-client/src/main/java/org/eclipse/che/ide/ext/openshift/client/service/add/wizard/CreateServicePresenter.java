@@ -26,6 +26,10 @@ import org.eclipse.che.ide.dto.DtoFactory;
 
 import javax.validation.constraints.NotNull;
 
+/**
+ * Presenter, which controls datasource service creation
+ *
+ */
 @Singleton
 public class CreateServicePresenter implements Wizard.UpdateDelegate, CreateServiceWizardView.ActionDelegate  {
 
@@ -40,7 +44,6 @@ public class CreateServicePresenter implements Wizard.UpdateDelegate, CreateServ
 
     private CreateServiceWizard wizard;
     private WizardPage<NewServiceRequest>                 currentPage;
-
 
     @Inject
     public CreateServicePresenter(NotificationManager notificationManager,
@@ -64,6 +67,9 @@ public class CreateServicePresenter implements Wizard.UpdateDelegate, CreateServ
         view.setDelegate(this);
     }
 
+    /**
+     * Create wizard and show
+     */
     public void createWizardAndShow() {
         wizard = wizardFactory.newServiceWizard(dtoFactory.createDto(NewServiceRequest.class));
         
@@ -77,18 +83,22 @@ public class CreateServicePresenter implements Wizard.UpdateDelegate, CreateServ
             view.showWizard();
         }
     }
-    
+
+    /**
+     * Show wizard page
+     * @param wizardPage current wizard page
+     */
     private void showWizardPage(@NotNull WizardPage<NewServiceRequest> wizardPage) {
         currentPage = wizardPage;
         updateControls();
         view.showPage(currentPage);
     }
-    
+
     @Override
     public void updateControls() {
         view.setPreviousButtonEnabled(wizard.hasPrevious());
         view.setNextButtonEnabled(wizard.hasNext() && currentPage.isCompleted());
-        view.setCreateButtonEnabled(wizard.canComplete());
+        view.setCreateButtonEnabled(wizard.canComplete() && !currentPage.equals(wizard.getFirstPage()));//&& currentPage.canSkip()  check it!!!!!
     }
 
     @Override

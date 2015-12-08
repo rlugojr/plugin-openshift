@@ -11,7 +11,6 @@
 package org.eclipse.che.ide.ext.openshift.client.service.add.wizard;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import com.google.common.base.Optional;
@@ -32,10 +31,9 @@ import org.eclipse.che.api.promises.client.PromiseError;
 import org.eclipse.che.api.promises.client.js.Promises;
 import org.eclipse.che.api.workspace.shared.dto.ProjectConfigDto;
 import org.eclipse.che.ide.api.app.AppContext;
-import org.eclipse.che.ide.api.notification.NotificationManager;
 import org.eclipse.che.ide.api.wizard.AbstractWizard;
+import org.eclipse.che.ide.api.wizard.WizardPage;
 import org.eclipse.che.ide.dto.DtoFactory;
-import org.eclipse.che.ide.ext.openshift.client.OpenshiftLocalizationConstant;
 import org.eclipse.che.ide.ext.openshift.client.OpenshiftServiceClient;
 import org.eclipse.che.ide.ext.openshift.client.dto.NewServiceRequest;
 import org.eclipse.che.ide.ext.openshift.shared.dto.Container;
@@ -55,7 +53,7 @@ import static org.eclipse.che.ide.ext.openshift.shared.OpenshiftProjectTypeConst
  */
 public class CreateServiceWizard extends AbstractWizard<NewServiceRequest> {
 
-    private final OpenshiftServiceClient        openshiftServiceClient;
+    private final OpenshiftServiceClient client;
     private final AppContext                    appContext;
     private final DtoFactory                    dtoFactory;
 
@@ -63,13 +61,17 @@ public class CreateServiceWizard extends AbstractWizard<NewServiceRequest> {
 
     @Inject
     public CreateServiceWizard(@Assisted NewServiceRequest newServiceRequest,
-                               OpenshiftServiceClient openshiftServiceClient,
+                               OpenshiftServiceClient client,
                                AppContext appContext,
                                DtoFactory dtoFactory) {
         super(newServiceRequest);
-        this.openshiftServiceClient = openshiftServiceClient;
+        this.client = client;
         this.appContext = appContext;
         this.dtoFactory = dtoFactory;
+    }
+
+    public WizardPage<NewServiceRequest> getFirstPage() {
+        return wizardPages.get(0);
     }
 
     @Override
@@ -80,9 +82,9 @@ public class CreateServiceWizard extends AbstractWizard<NewServiceRequest> {
 
         Template template = dataObject.getTemplate();
 
-        openshiftServiceClient.processTemplate(nameSpace, template).then(processTemplate())
-                                                                   .then(onSuccess(callback))
-                                                                   .catchError(handleError(callback));
+        client.processTemplate(nameSpace, template).then(processTemplate())
+                                                   .then(onSuccess(callback))
+                                                   .catchError(handleError(callback));
     }
     
      private String getAttributeValue(ProjectConfigDto projectConfig, String value) {
@@ -105,13 +107,13 @@ public class CreateServiceWizard extends AbstractWizard<NewServiceRequest> {
                         case "Service":
                             Service service = dtoFactory.createDtoFromJson(json.toString(), Service.class);
                             service.getMetadata().setNamespace(nameSpace);
-                            promiseList.add(openshiftServiceClient.createService(service));
+                            promiseList.add(client.createService(service));
                             break;
                         case "DeploymentConfig":
                             final DeploymentConfig deploymentConfig = dtoFactory.createDtoFromJson(json.toString(), DeploymentConfig.class);
                             deploymentConfig.getMetadata().setNamespace(nameSpace);
-                            Promise<DeploymentConfig> p = openshiftServiceClient.createDeploymentConfig(deploymentConfig)
-                                                                                .then(updateApplication());
+                            Promise<JsArrayMixed> p = client.createDeploymentConfig(deploymentConfig)
+                                                            .thenPromise(getApplicationDeploymentConfigs());
                             promiseList.add(p);
                             break;
                     }
@@ -122,49 +124,69 @@ public class CreateServiceWizard extends AbstractWizard<NewServiceRequest> {
         };
     }
 
-    private Operation<DeploymentConfig> updateApplication() {
-        return new Operation<DeploymentConfig>() {
+    private Function<DeploymentConfig, Promise<JsArrayMixed>> getApplicationDeploymentConfigs() {
+        return new Function<DeploymentConfig, Promise<JsArrayMixed>>() {
             @Override
-            public void apply(DeploymentConfig serviceConfig) throws OperationException {
-                final String deploymentConfigName = serviceConfig.getMetadata().getName();
-                final List<Container> containersForUpdate = serviceConfig.getSpec().getTemplate().getSpec().getContainers();
+            public Promise<JsArrayMixed> apply(final DeploymentConfig serviceConfig) throws FunctionException {
                 String applicationName = appContext.getCurrentProject().getRootProject().getName();
+                return client.getDeploymentConfigs(nameSpace, applicationName)
+                             .then(new Function<List<DeploymentConfig>, List<DeploymentConfig>>() {
+                                 @Override
+                                 public List<DeploymentConfig> apply(List<DeploymentConfig> configs) throws FunctionException {
+                                     final String deploymentConfigName = serviceConfig.getMetadata().getName();
+                                     final List<Container> containersForUpdate = serviceConfig.getSpec().getTemplate().getSpec()
+                                             .getContainers();
+                                     for (DeploymentConfig config : configs) {
+                                         List<Container> containers = config.getSpec().getTemplate().getSpec().getContainers();
 
-                openshiftServiceClient.getDeploymentConfigs(nameSpace, applicationName).then(new Operation<List<DeploymentConfig>>() {
-                    @Override
-                    public void apply(List<DeploymentConfig> configs) throws OperationException {
-                        for (DeploymentConfig config : configs) {
-                            List<Container> containers = config.getSpec().getTemplate().getSpec().getContainers();
+                                         if (containers == null) {
+                                             config.getSpec().getTemplate().getSpec().setContainers(containersForUpdate);
+                                             continue;//todo check it again
+                                         }
 
-                            if (containers == null) {
-                                config.getSpec().getTemplate().getSpec().setContainers(containersForUpdate);
-                                return;
-                            }
-
-                            for (Container containerForUpdate : containersForUpdate) {
-                                for (Container container : containers) {
-                                    updateContainerEnv(container, containerForUpdate.getEnv());
-                                }
-                            }
-                            config.getMetadata().getLabels().put("database", deploymentConfigName);
-                            updateApplicationDeploymentConfigsRecursive(configs.iterator());
-                        }
-                    }
-                });
+                                         for (Container containerForUpdate : containersForUpdate) {
+                                             for (Container container : containers) {
+                                                 updateContainerEnv(container, containerForUpdate.getEnv());
+                                             }
+                                         }
+                                         config.getMetadata().getLabels().put("database", deploymentConfigName);
+                                     }
+                                     return configs;
+                                 }
+                             }).thenPromise(updateApplicationDeploymentConfigsRecursive());
             }
         };
     }
 
-    private void updateApplicationDeploymentConfigsRecursive(final Iterator<DeploymentConfig> configsIterator) {
-        if (configsIterator.hasNext()) {
-            openshiftServiceClient.updateDeploymentConfig(configsIterator.next()).then(new Operation<DeploymentConfig>() {
-                @Override
-                public void apply(DeploymentConfig arg) throws OperationException {
-                    updateApplicationDeploymentConfigsRecursive(configsIterator);
+
+    private Function<List<DeploymentConfig>, Promise<JsArrayMixed>> updateApplicationDeploymentConfigsRecursive() {
+        return new Function<List<DeploymentConfig>, Promise<JsArrayMixed>>() {
+            @Override
+            public Promise<JsArrayMixed> apply(List<DeploymentConfig> configs) throws FunctionException {
+                List<Promise<?>> promiseList = new ArrayList<>();
+                for(DeploymentConfig config: configs) {
+                    Promise<DeploymentConfig> promise = client.updateDeploymentConfig(config);
+                    promiseList.add(promise);
                 }
-            });
-        }
+                Promise<?>[] promises = promiseList.toArray(new Promise<?>[promiseList.size()]);
+                return Promises.all(promises);
+            }
+        };
     }
+
+//    private Function<List<DeploymentConfig>, Promise<JsArrayMixed>> updateApplicationDeploymentConfigsRecursive() {
+//        return new Function<List<DeploymentConfig>, Promise<JsArrayMixed>>() {
+//            @Override
+//            public Promise<JsArrayMixed> apply(List<DeploymentConfig> configs) throws FunctionException {
+//                Promise<?>[] promises = new Promise[configs.size()];
+//                int i = 0;
+//                for(DeploymentConfig config: configs) {
+//                    promises[i++] = client.updateDeploymentConfig(config);
+//                }
+//                return Promises.all(promises);
+//            }
+//        };
+//    }
 
     private void updateContainerEnv(Container container, List<EnvVar> envVariables) {
         List<EnvVar> containerEnvs = container.getEnv();
