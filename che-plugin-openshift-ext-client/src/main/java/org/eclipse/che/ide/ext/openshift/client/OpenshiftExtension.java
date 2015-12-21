@@ -29,8 +29,8 @@ import org.eclipse.che.ide.ext.openshift.client.delete.DeleteProjectAction;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import static org.eclipse.che.ide.api.action.IdeActions.GROUP_HELP;
 import static org.eclipse.che.ide.api.action.IdeActions.GROUP_MAIN_MENU;
-import static org.eclipse.che.ide.api.action.IdeActions.GROUP_WINDOW;
 import static org.eclipse.che.ide.api.constraints.Anchor.BEFORE;
 
 /**
@@ -63,7 +63,7 @@ public class OpenshiftExtension {
 
         DefaultActionGroup openshift = new DefaultActionGroup(OPENSHIFT_GROUP_MAIN_MENU, true, actionManager);
         actionManager.registerAction("openshift", openshift);
-        mainMenu.add(openshift, new Constraints(BEFORE, GROUP_WINDOW));
+        mainMenu.add(openshift, new Constraints(BEFORE, GROUP_HELP));
 
         actionManager.registerAction("connectOpenshiftAccount", connectAccountAction);
         openshift.add(connectAccountAction);
